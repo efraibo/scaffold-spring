@@ -1,0 +1,35 @@
+#version: '3'
+#
+#services:
+#  springboot-docker-compose-app-container:
+#    image: spring-boot-app
+#    build:
+#      context: ./
+#      dockerfile: Dockerfile
+#    volumes:
+#      - /data/spring-boot-app
+#    ports:
+#      - "8080:8080"
+
+version: '2'
+services:
+  db:
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=p4$$W0rd
+      - MYSQL_DATABASE=scaffold
+      - MYSQL_USER=scaffold
+      - MYSQL_PASSWORD=scaffold
+      - MYSQL_ONETIME_PASSWORD=true
+    ports:
+      - 3306:3306
+  web:
+    image: scaffold/scaffold-spring
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/scaffold?useSSL=false&allowPublicKeyRetrieval=true
+      - SPRING_DATASOURCE_USERNAME=scaffold
+      - SPRING_DATASOURCE_PASSWORD=scaffold

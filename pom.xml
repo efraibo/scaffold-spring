@@ -20,6 +20,8 @@
         <org.mapstruct.version>1.2.0.Final</org.mapstruct.version>
         <org.projectlombok.version>1.18.2</org.projectlombok.version>
         <org.apache.maven.plugins.version>3.6.0</org.apache.maven.plugins.version>
+        <docker.image.prefix>scaffold</docker.image.prefix>
+        <maven-surefire-plugin.version>2.18.1</maven-surefire-plugin.version>
     </properties>
 
     <dependencies>
@@ -90,13 +92,43 @@
                         <arg>-Amapstruct.suppressGeneratorTimestamp=true</arg>
                         <arg>-Amapstruct.defaultComponentModel=spring</arg>
                     </compilerArgs>
+
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+            <!-- tag::plugin[] -->
+            <plugin>
+                <groupId>com.spotify</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <configuration>
+                    <imageName>${docker.image.prefix}/${project.artifactId}</imageName>
+                    <dockerDirectory>src/Docker</dockerDirectory>
+                    <resources>
+                        <resource>
+                            <targetPath>/</targetPath>
+                            <directory>${project.build.directory}</directory>
+                            <include>${project.build.finalName}.jar</include>
+                        </resource>
+                    </resources>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
+                <configuration>
+                    <argLine>--add-modules java.se.ee</argLine>
+                    <argLine>--add-modules java.xml.bind</argLine>
+                    <argLine>--add-modules java.xml.ws.annotation</argLine>
+                </configuration>
+            </plugin>
+            <!-- end::plugin[] -->
         </plugins>
+
     </build>
 
 </project>
