@@ -6,6 +6,8 @@ import com.sourceinformation.scaffold.mapper.TaskMapper;
 import com.sourceinformation.scaffold.services.ITaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -31,8 +32,8 @@ public class TaskController {
 
 
     @GetMapping
-    public ResponseEntity<List<TaskDTO>> findAll() {
-        return new ResponseEntity<>(mapper.toTaskDTOs(service.findAll()), HttpStatus.OK);
+    public ResponseEntity<Page<TaskDTO>> findAll(Pageable pageable) {
+        return new ResponseEntity<>(service.findAll(pageable).map(mapper::domainToDto), HttpStatus.OK);
     }
 
     @PostMapping

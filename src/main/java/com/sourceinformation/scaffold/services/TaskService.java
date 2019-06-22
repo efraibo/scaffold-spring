@@ -3,9 +3,10 @@ package com.sourceinformation.scaffold.services;
 import com.sourceinformation.scaffold.entities.Task;
 import com.sourceinformation.scaffold.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -16,13 +17,13 @@ public class TaskService implements ITaskService {
     private final TaskRepository taskRepository;
 
     @Override
-    public List<Task> findAll() {
-        return taskRepository.findAll();
+    public Page<Task> findAll(Pageable pageable) {
+        return taskRepository.findAll(pageable);
     }
 
     @Override
     public Task saveTask(Task task) {
-        return taskRepository.saveAndFlush(task);
+        return taskRepository.save(task);
     }
 
     @Override
