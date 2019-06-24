@@ -1,42 +1,73 @@
 package com.sourceinformation.scaffold.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    // Create 2 users for demo
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-
-        auth.inMemoryAuthentication()
-                .withUser("user").password("{noop}password").roles("USER")
-                .and()
-                .withUser("admin").password("{noop}password").roles("USER", "ADMIN");
-
+        auth.authenticationProvider(authenticationProvider());
     }
 
-    // Secure the endpoins with HTTP Basic authentication
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-
-        http
-                //HTTP Basic authentication
+        http.authorizeRequests()
+                .anyRequest().authenticated()
+                .and()
                 .httpBasic()
                 .and()
-                .authorizeRequests()
-                .antMatchers(HttpMethod.GET, "/tasks/**").hasRole("USER")
-                .antMatchers(HttpMethod.POST, "/tasks").hasRole("ADMIN")
-                .antMatchers(HttpMethod.PUT, "/tasks/**").hasRole("ADMIN")
-                .antMatchers(HttpMethod.PATCH, "/tasks/**").hasRole("ADMIN")
-                .antMatchers(HttpMethod.DELETE, "/tasks/**").hasRole("ADMIN")
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
+                .csrf().disable();
 
-                .csrf().disable()
-                .formLogin().disable();
+//        http
+//                .httpBasic()
+//                .and()
+//                .authorizeRequests()
+//                .antMatchers(HttpMethod.DELETE, "/tasks/**").hasRole("ADMIN")
+//                .antMatchers(HttpMethod.GET,"/tasks/**").hasAnyRole("USER","ADMIN")
+//                .antMatchers(HttpMethod.POST, "/tasks").hasAnyRole("USER","ADMIN")
+//                .antMatchers(HttpMethod.PUT, "/tasks").hasAnyRole("USER","ADMIN")
+//                .and()
+//                .requiresChannel()
+//                .antMatchers("/").requiresSecure()
+//                .and()
+//                .csrf().disable()
+//                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+//        .antMatchers(HttpMethod.GET, "/tasks/**").hasRole("ADMIN")
+    }
+
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider(){
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setPasswordEncoder(passwordEncoder);
+        provider.setUserDetailsService(userDetailsService);
+        return provider;
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return super.userDetailsService();
     }
 
 }

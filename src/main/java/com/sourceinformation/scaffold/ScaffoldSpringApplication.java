@@ -1,8 +1,15 @@
 package com.sourceinformation.scaffold;
 
+import com.sourceinformation.scaffold.entities.Role;
+import com.sourceinformation.scaffold.entities.User;
+import com.sourceinformation.scaffold.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -42,6 +49,27 @@ public class ScaffoldSpringApplication {
         source.registerCorsConfiguration("/**", corsConfiguration);
 
         return source;
+    }
+
+    @Component
+    class DemoCommandLineRunner implements CommandLineRunner {
+
+
+        @Autowired
+        private UserRepository userRepository;
+
+        @Autowired
+        private PasswordEncoder passwordEncoder;
+
+        @Override
+        public void run(String... args) throws Exception {
+            User user = new User();
+            user.setUsername("application-user");
+            user.setPassword(passwordEncoder.encode("password"));
+            user.grantAuthority(Role.ADMIN);
+
+            userRepository.save(user);
+        }
     }
 
 }
